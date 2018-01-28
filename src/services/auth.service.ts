@@ -15,7 +15,7 @@ export class AuthService {
 
     }
 
-    authenticate(credenciais: CredenciaisDTO){
+    authenticate(credenciais: CredenciaisDTO) {
         return this.http.post(`${API_CONFIG.baseUrl}/login`,
             credenciais,
             {
@@ -25,9 +25,19 @@ export class AuthService {
         );
     }
 
-    successfulLogin(authorizationValue: string){
+    refreshToken() {
+        return this.http.post(
+            `${API_CONFIG.baseUrl}/auth/refresh_token`,
+            {},
+            {
+                observe: 'response',
+                responseType: 'text'
+            });
+    }
+
+    successfulLogin(authorizationValue: string) {
         let tokenValue = authorizationValue.substr(7);
-        let user : LocalUser = {
+        let user: LocalUser = {
             token: tokenValue,
             email: this.jwtHelper.decodeToken(tokenValue).sub
         };
