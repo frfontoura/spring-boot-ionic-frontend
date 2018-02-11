@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { PedidoDTO } from '../../models/pedido.dto';
+import { CartItem } from '../../models/cart_item';
 import { EnderecoDTO } from '../../models/endereco.dto';
 import { ClienteDTO } from '../../models/cliente.dto';
 import { ClienteService } from '../../services/domain/cliente.service';
 import { CartService } from '../../services/domain/cart.service';
-import { CartItem } from '../../models/cart_item';
 import { PedidoService } from '../../services/domain/pedido.service';
 
 @IonicPage()
@@ -19,9 +19,10 @@ export class OrderConfirmationPage {
   cartItems: CartItem[];
   cliente: ClienteDTO;
   endereco: EnderecoDTO;
+  codpedido: string;
 
   constructor(
-    public navCtrl: NavController, 
+    public navCtrl: NavController,
     public navParams: NavParams,
     public clienteService: ClienteService,
     public cartService: CartService,
@@ -38,34 +39,43 @@ export class OrderConfirmationPage {
         this.cliente = response as ClienteDTO;
         this.endereco = this.findEndereco(this.pedido.enderecoDeEntrega.id, response['enderecos']);
       },
-      error => {
-        this.navCtrl.setRoot('HomePage');
-      });
+        error => {
+          this.navCtrl.setRoot('HomePage');
+        });
   }
 
-  private findEndereco(id: string, list: EnderecoDTO[]) : EnderecoDTO {
+  private findEndereco(id: string, list: EnderecoDTO[]): EnderecoDTO {
     let position = list.findIndex(x => x.id == id);
     return list[position];
   }
 
-  total() : number {
+  total(): number {
     return this.cartService.total();
-  } 
+  }
 
   back() {
     this.navCtrl.setRoot('CartPage');
+  }
+
+  home() {
+    this.navCtrl.setRoot('CategoriasPage');
   }
 
   checkout() {
     this.pedidoService.insert(this.pedido)
       .subscribe(response => {
         this.cartService.createOrClearCart();
-        console.log(response.headers.get('location'));
+        this.codpedido = this.extractId(response.headers.get('location'));
       },
-      error => {
-        if (error.status == 403) {
-          this.navCtrl.setRoot('HomePage');
-        }
-      });
+        error => {
+          if (error.status == 403) {
+            this.navCtrl.setRoot('HomePage');
+          }
+        });
+  }
+
+  private extractId(location: string): string {
+    let position = location.lastIndexOf('/');
+    return location.substring(position + 1, location.length);
   }
 }
