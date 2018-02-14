@@ -50,7 +50,7 @@ export class ProfilePage {
   getImageIfExists() {
     this.clienteService.getImageFromBucket(this.cliente.id)
       .subscribe(response => {
-        this.cliente.imageUrl = `${API_CONFIG.bucketBaseUrl}/cp${this.cliente.id}.jpg`;
+        this.cliente.imageUrl = `${API_CONFIG.bucketBaseUrl}/cp${this.cliente.id}.jpg?time=` + new Date().getMilliseconds;
       }, error => { });
   }
 
@@ -59,6 +59,24 @@ export class ProfilePage {
     
     const options: CameraOptions = {
       quality: 100,
+      destinationType: this.camera.DestinationType.DATA_URL,
+      encodingType: this.camera.EncodingType.PNG,
+      mediaType: this.camera.MediaType.PICTURE
+    }
+    
+    this.camera.getPicture(options).then((imageData) => {
+     this.picture = 'data:image/png;base64,' + imageData;
+     this.cameraOn = false;
+    }, (err) => {
+    });
+  }
+
+  getGalleryPicture() {
+    this.cameraOn = true;
+
+    const options: CameraOptions = {
+      quality: 100,
+      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
       destinationType: this.camera.DestinationType.DATA_URL,
       encodingType: this.camera.EncodingType.PNG,
       mediaType: this.camera.MediaType.PICTURE
