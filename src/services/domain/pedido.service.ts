@@ -19,4 +19,8 @@ export class PedidoService {
             }
         );
     }
+
+    findAll(page: number = 0, size: number = 4) {
+        return this.http.get(`${API_CONFIG.baseUrl}/pedidos?page=${page}&linesPerPage=${size}`);
+    }
 }
